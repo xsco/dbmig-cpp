@@ -1,4 +1,5 @@
 AC_INIT([dbmig command-line client], [0.0.1], [bugs@xsco.org], [dbmig])
+AM_SILENT_RULES([yes])
 AM_INIT_AUTOMAKE([-Wall])
 
 AC_CONFIG_MACRO_DIR([m4])
