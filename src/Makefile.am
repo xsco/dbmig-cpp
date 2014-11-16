@@ -1,0 +1,2 @@
+SUBDIRS = libdbmig dbmig libdbmigtest
+

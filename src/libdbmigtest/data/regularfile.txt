@@ -1,0 +1,2 @@
+This is a regular file.
+Used to check that script_dirs cannot be constructed on files.

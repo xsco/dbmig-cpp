@@ -1,0 +1,60 @@
+TODO List:
+
+* Set up dbmig.xsco.org website, and github hosting.
+* Record dependencies explicitly, e.g. >= g++ 4.8.1, >= libboost-1.54.
+* Add tests for when upgrade/rollback scripts don't have the magic separator.
+* Should the script number (script.XXXX) be recorded as a numeric, or stored
+  with any zero-padding?  Prefer numeric and always parse to this.
+* Fill in timing information when running scripts.
+* Add libdbmigtest/data/ to Makefiles so that it is included in "make dist".
+* Add a -s/--simulate switch to print what *would* happen.
+* Add integration tests that will use a real database environment to run tests.
+  - Should there be a test/ sub-dir in libdbmig for genuine unit tests of the
+    internal classes, and use libdbmigtest only for integration tests on the
+    public API?
+* Implement create-unversioned command using DFS search on filesystem.
+* Implement purge command.
+* Write unit tests that cover globbing functionality in script_dir.
+* Clean up repeated option-parsing code in dbmig.cpp.
+* Move libdbmig includes to a dbmig/ subdir, e.g. #include <dbmig/migrate.hpp>
+* Link dbmig to libdbmig as a shared library.
+* Ensure cross-compiling for win32 works.  Dependent libs?
+* Think about approach to Java / .NET bindings.
+
+Completed:
+* There is a bug in the translation between repository and script_dir.
+  repository::upgrade_scripts() expects the from version to be the starting
+  version, i.e. that already deployed.  But in script_dir::range(), the from
+  version is expected to include upgrade scripts.  If we have an install script
+  which has the same version as an upgrade script, will this break?
+  This bug will not manifest when rolling back, since the scripts are versioned
+  after the incumbent changelog version in that scenario.
+* Add tests for repository::upgrade_script_at().
+* Add globbing support to script_dir's search, so that only *.sql is considered
+  in scope, and other files are not flagged for not being version-parseable.
+* The changelog table's script_path field should contain a relative path
+  (relative to the repository's install/upgrade directory).
+* Add a "check" command (or different name) to attempt to identify whether the
+  chosen repository has scripts that are compatible with what is in the
+  changelog of a target database
+  - The output highlight should specific missing or not-deployed scripts
+  - What should the behaviour be when old upgrade scripts have been replaced
+    with a new install script in the repo but the DB has older upgrade history?
+* Rename changelog table to dbmig_changelog, to avoid possible name clashes.
+* Implement migrate command fully.
+* Implement method that performs roll-back.
+* Add class/functions to execute script statements, and then write a changelog
+  entry in a single transaction.
+* Separate changelog into changelog_table (takes a SOCI session) and changelog
+  the service, which is a class that takes conn string and changeset.
+* Make any command that changes the database ask for confirmation before
+  proceeding, unless a -f/--force flag has been specified.
+  Replace --simulate option with --force too.
+* Upgrade from SHA1 hashes to SHA256.
+* Implement SHA256-hashing algorithm for scripts applied.  Use crypto++ lib.
+  Make sure that the digest calculated matches what sha256sum would say.
+* Write unit test in repository_test to check that noncontiguous scripts are
+  correctly identified.
+* Write iterators/streams for deployment actions.
+* Use SOCI library for DB access.
+

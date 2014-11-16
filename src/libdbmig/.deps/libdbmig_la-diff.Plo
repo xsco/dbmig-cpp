@@ -1,0 +1,5 @@
+libdbmig_la-diff.lo: diff.cpp /usr/include/stdc-predef.h diff.hpp
+
+/usr/include/stdc-predef.h:
+
+diff.hpp:
