@@ -7,7 +7,18 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CXX
 AM_PROG_CC_C_O
 AC_LANG([C++])
+
+# Require C++11
 AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
+
+# Check some dependencies.
+AC_CHECK_HEADER([fnmatch.h])
+AC_CHECK_HEADER([boost/program_options.hpp])
+AC_CHECK_HEADER([boost/filesystem.hpp])
+AC_CHECK_HEADER([boost/regex.hpp])
+AC_CHECK_HEADER([boost/algorithm/string/trim.hpp])
+AC_CHECK_HEADER([soci/soci.h])
+PKG_CHECK_MODULES([libcryptopp], [libcrypto++ >= 5.6.0])
 
 AM_PROG_AR
 LT_INIT

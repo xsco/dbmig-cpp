@@ -1,7 +1,5 @@
 TODO List:
 
-* Set up dbmig.xsco.org website, and github hosting.
-* Record dependencies explicitly, e.g. >= g++ 4.8.1, >= libboost-1.54.
 * Add tests for when upgrade/rollback scripts don't have the magic separator.
 * Should the script number (script.XXXX) be recorded as a numeric, or stored
   with any zero-padding?  Prefer numeric and always parse to this.
@@ -22,6 +20,7 @@ TODO List:
 * Think about approach to Java / .NET bindings.
 
 Completed:
+* Set up dbmig.xsco.org website, and github hosting.
 * There is a bug in the translation between repository and script_dir.
   repository::upgrade_scripts() expects the from version to be the starting
   version, i.e. that already deployed.  But in script_dir::range(), the from
