@@ -6,6 +6,7 @@ find . -name Makefile.in -exec rm -f {} \;
 rm -rf \
     Makefile \
     Makefile.in \
+    README \
     aclocal.m4 \
     ar-lib \
     autom4te.cache \
