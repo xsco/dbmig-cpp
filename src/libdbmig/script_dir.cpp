@@ -403,13 +403,18 @@ static semver parse_semver_candidate(const string &candidate,
                                      const string &path)
 {
     auto ver = semver::parse(candidate);
-    auto bm_ids = ver.bm_ids();
+    auto &bm_ids = ver.bm_ids();
 
     if (bm_ids.size() >= 2 &&
         !bm_ids[0].is_numeric && bm_ids[0].str_value == "script" &&
         bm_ids[1].is_numeric)
     {
-        return ver;
+        // Reconstruct the semver, to ensure that a numerical representation
+        // of the script number is used.  This has the effect of removing any
+        // leading zeroes in the database changelog that may have been used in
+        // the filename for convenience of ordering.
+        std::string bms = "script." + std::to_string(bm_ids[1].numeric_value);
+        return semver{ver.mj(), ver.mn(), ver.pt(), "", bms};
     }
 
     // Doesn't pass the tests.

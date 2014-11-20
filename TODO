@@ -1,8 +1,6 @@
 TODO List:
 
 * Add tests for when upgrade/rollback scripts don't have the magic separator.
-* Should the script number (script.XXXX) be recorded as a numeric, or stored
-  with any zero-padding?  Prefer numeric and always parse to this.
 * Fill in timing information when running scripts.
 * Add libdbmigtest/data/ to Makefiles so that it is included in "make dist".
 * Add a -s/--simulate switch to print what *would* happen.
@@ -20,6 +18,8 @@ TODO List:
 * Think about approach to Java / .NET bindings.
 
 Completed:
+* The script number (script.XXXX) should be recorded as a numeric, rather than
+  stored with any zero-padding.  Prefer numeric and always parse to this.
 * Set up dbmig.xsco.org website, and github hosting.
 * There is a bug in the translation between repository and script_dir.
   repository::upgrade_scripts() expects the from version to be the starting

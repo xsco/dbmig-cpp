@@ -251,7 +251,7 @@ static void migrate(
     
     // Check we reached the version.
     if (current_version != target_version) {
-        std::cerr << "Only migrated to version " << current_version
+        std::cerr << "Warning: migrated to version " << current_version
                   << ", rather than requested version " << target_version
                   << std::endl;
     }

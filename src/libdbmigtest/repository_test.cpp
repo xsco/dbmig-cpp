@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE (repo4_nearest_install_script)
 {
     repository r4("data/repo4");
     pair<const semver, string> exp1{
-        semver{2, 44, 2, "", "script.0057"},
+        semver{2, 44, 2, "", "script.57"},
         "2.44.2/2.44.2+script.0057_install.sql"};
     
     auto range1 = r4.nearest_install_script(semver{1, 0, 0});
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE (repo4_nearest_install_script)
     BOOST_CHECK(iter3 == range3.second);
     
     auto range4 = r4.nearest_install_script(
-            semver{2, 44, 2, "", "script.0057"});
+            semver{2, 44, 2, "", "script.57"});
     auto iter4 = range4.first;
     auto iter4_exp1 = *iter4++;
     BOOST_CHECK_EQUAL(iter4_exp1, exp1);
@@ -118,17 +118,17 @@ BOOST_AUTO_TEST_CASE (repo4_upgrade_scripts)
 {
     repository r4("data/repo4");
     pair<const semver, string> exp1{
-        semver{2, 44, 3, "", "script.0001"},
+        semver{2, 44, 3, "", "script.1"},
         "2.44.3/0001_foo.sql"};
     pair<const semver, string> exp2{
-        semver{2, 44, 3, "", "script.0002"},
+        semver{2, 44, 3, "", "script.2"},
         "2.44.3/0002_bar.sql"};
     pair<const semver, string> exp3{
-        semver{2, 45, 0, "", "script.0001"},
+        semver{2, 45, 0, "", "script.1"},
         "2.45.0/0001_quux.sql"};
     
     auto range1 = r4.upgrade_scripts(semver{2,44,3},
-                                     semver{2,45,0,"","script.0001"});
+                                     semver{2,45,0,"","script.1"});
     auto iter1 = range1.first;
     auto iter1_exp1 = *iter1++;
     auto iter1_exp2 = *iter1++;
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE (repo4_upgrade_scripts)
     BOOST_CHECK_EQUAL(iter1_exp3, exp3);
     BOOST_CHECK(iter1 == range1.second);
     
-    auto range2 = r4.upgrade_scripts(semver{2,44,3,"","script.0001"},
+    auto range2 = r4.upgrade_scripts(semver{2,44,3,"","script.1"},
                                      semver{2,45,0});
     auto iter2 = range2.first;
     auto iter2_exp1 = *iter2++;
@@ -166,36 +166,36 @@ BOOST_AUTO_TEST_CASE (repo4_upgrade_script_at)
 {
     repository r4("data/repo4");
     pair<const semver, string> exp1{
-        semver{2, 44, 3, "", "script.0001"},
+        semver{2, 44, 3, "", "script.1"},
         "2.44.3/0001_foo.sql"};
     pair<const semver, string> exp2{
-        semver{2, 44, 3, "", "script.0002"},
+        semver{2, 44, 3, "", "script.2"},
         "2.44.3/0002_bar.sql"};
     pair<const semver, string> exp3{
-        semver{2, 45, 0, "", "script.0001"},
+        semver{2, 45, 0, "", "script.1"},
         "2.45.0/0001_quux.sql"};
     
-    auto range1 = r4.upgrade_script_at(semver{2,44,3,"","script.0001"});
+    auto range1 = r4.upgrade_script_at(semver{2,44,3,"","script.1"});
     auto iter1 = range1.first;
     auto iter1_exp = *iter1++;
     BOOST_CHECK_EQUAL(iter1_exp, exp1);
     BOOST_CHECK(iter1 == range1.second);
     
-    auto range2 = r4.upgrade_script_at(semver{2,44,3,"","script.0002"});
+    auto range2 = r4.upgrade_script_at(semver{2,44,3,"","script.2"});
     auto iter2 = range2.first;
     auto iter2_exp = *iter2++;
     BOOST_CHECK_EQUAL(iter2_exp, exp2);
     BOOST_CHECK(iter2 == range2.second);
     
-    auto range3 = r4.upgrade_script_at(semver{2,45,0,"","script.0001"});
+    auto range3 = r4.upgrade_script_at(semver{2,45,0,"","script.1"});
     auto iter3 = range3.first;
     auto iter3_exp = *iter3++;
     BOOST_CHECK_EQUAL(iter3_exp, exp3);
     BOOST_CHECK(iter3 == range3.second);
     
     auto range4 = r4.upgrade_script_at(semver{2,44,3});
-    auto range5 = r4.upgrade_script_at(semver{2,44,3,"","script.0003"});
-    auto range6 = r4.upgrade_script_at(semver{2,45,0,"","script.0007"});
+    auto range5 = r4.upgrade_script_at(semver{2,44,3,"","script.3"});
+    auto range6 = r4.upgrade_script_at(semver{2,45,0,"","script.7"});
     
     BOOST_CHECK(range4.first == range4.second);
     BOOST_CHECK(range5.first == range5.second);

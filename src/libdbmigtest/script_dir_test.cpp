@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE (scriptdir1_iter_begin_end)
         semver{43, 209, 153, "", "script.17389"},
         "43.209.153+script.17389_foo.sql"};
     auto exp4 = pair<semver, string>{
-        semver{43, 210, 0, "", "script.0088"},
+        semver{43, 210, 0, "", "script.88"},
         "43.210.0/script.0088.sql"};
     auto exp5 = pair<semver, string>{
         semver{43, 210, 1, "", "script.972"},
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE (scriptdir1_iter_cbegin_cend)
         semver{43, 209, 153, "", "script.17389"},
         "43.209.153+script.17389_foo.sql"};
     auto exp4 = pair<semver, string>{
-        semver{43, 210, 0, "", "script.0088"},
+        semver{43, 210, 0, "", "script.88"},
         "43.210.0/script.0088.sql"};
     auto exp5 = pair<semver, string>{
         semver{43, 210, 1, "", "script.972"},
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE (scriptdir1_first_greater)
         semver{43, 209, 153, "", "script.17389"},
         "43.209.153+script.17389_foo.sql"};
     auto exp4 = pair<semver, string>{
-        semver{43, 210, 0, "", "script.0088"},
+        semver{43, 210, 0, "", "script.88"},
         "43.210.0/script.0088.sql"};
     auto exp5 = pair<semver, string>{
         semver{43, 210, 1, "", "script.972"},
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE (scriptdir1_last_less_equal)
         semver{43, 209, 153, "", "script.17389"},
         "43.209.153+script.17389_foo.sql"};
     auto exp4 = pair<semver, string>{
-        semver{43, 210, 0, "", "script.0088"},
+        semver{43, 210, 0, "", "script.88"},
         "43.210.0/script.0088.sql"};
     auto exp5 = pair<semver, string>{
         semver{43, 210, 1, "", "script.972"},
@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE (scriptdir1_range)
         semver{43, 209, 153, "", "script.17389"},
         "43.209.153+script.17389_foo.sql"};
     auto exp4 = pair<semver, string>{
-        semver{43, 210, 0, "", "script.0088"},
+        semver{43, 210, 0, "", "script.88"},
         "43.210.0/script.0088.sql"};
     auto exp5 = pair<semver, string>{
         semver{43, 210, 1, "", "script.972"},
