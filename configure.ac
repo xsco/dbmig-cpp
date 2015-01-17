@@ -12,11 +12,11 @@ AC_LANG([C++])
 AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
 
 # Check some dependencies.
-AC_CHECK_HEADER([fnmatch.h])
 AC_CHECK_HEADER([boost/program_options.hpp])
 AC_CHECK_HEADER([boost/filesystem.hpp])
 AC_CHECK_HEADER([boost/regex.hpp])
 AC_CHECK_HEADER([boost/algorithm/string/trim.hpp])
+AC_CHECK_HEADER([nowide/convert.hpp])
 AC_CHECK_HEADER([soci/soci.h])
 PKG_CHECK_MODULES([libcryptopp], [libcrypto++ >= 5.6.0])
 

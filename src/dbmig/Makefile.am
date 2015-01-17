@@ -11,7 +11,11 @@ dbmig_CPPFLAGS = \
 	-Werror -Wall
 
 # Linker flags.
+dbmig_LDFLAGS = -s
+
+# Additional libraries for the linker.
 dbmig_LDADD = ../libdbmig/libdbmig.la \
 	-lboost_system \
-	-lboost_program_options
+	-lboost_program_options \
+	-lnowide
 

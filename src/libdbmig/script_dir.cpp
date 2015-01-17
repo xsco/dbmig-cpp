@@ -22,31 +22,30 @@
 #include <boost/system/error_code.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
+#include <nowide/convert.hpp>
 
 #include "semver_compare.hpp"
-#include "filename_match.hpp"
 #include "exception.hpp"
 
-using namespace std;
-using namespace boost::system;
-namespace fs = boost::filesystem;
 
 namespace dbmig {
 
 // Private impl class
 struct script_dir::impl
 {
-    explicit impl(const string &script_dir_path) : impl(script_dir_path, ".sql")
+    explicit impl(const std::string &script_dir_path) :
+        impl(script_dir_path, ".sql")
     {}
     
-    impl(const string &script_dir_path, const string &file_extension) :
+    impl(const std::string &script_dir_path,
+         const std::string &file_extension) :
         path_(script_dir_path), file_extension_(file_extension), version_map_{}
     {
         preload();
     }
 
-    const string path_;
-    const string file_extension_;
+    const std::string path_;
+    const std::string file_extension_;
     
     map_type version_map_;
     
@@ -56,13 +55,51 @@ private:
 };
 
 // Non-member functions
-static bool matches_extension(const string &filename,
-                              const string &file_extension);
-static semver parse_filename(const string &parent_dir_name,
-                             const string &filename);
-static semver parse_filename(const string &filename);
-static semver parse_semver_candidate(const string &candidate,
-                                     const string &path);
+static bool matches_extension(const std::string &filename,
+                              const std::string &file_extension);
+static semver parse_filename(const std::string &parent_dir_name,
+                             const std::string &filename);
+static semver parse_filename(const std::string &filename);
+static semver parse_semver_candidate(const std::string &candidate,
+                                     const std::string &path);
+
+///
+/// Take a UTF-8 path and return that path in an encoding suitable for the
+/// native filesystem.
+///
+template<typename ValueType>
+std::basic_string<ValueType> utf8_to_fs(const std::string &path);
+template<>
+std::basic_string<char> utf8_to_fs(const std::string &path)
+{
+    // Already UTF-8 natively, no conversion.
+    return path;
+}
+template<>
+std::basic_string<wchar_t> utf8_to_fs(const std::string &path)
+{
+    // Widening conversion required.
+    return nowide::widen(path);
+}
+
+///
+/// Take a path in the encoding of the native filesystem and return that path
+/// in UTF-8.
+///
+template<typename ValueType>
+std::string fs_to_utf8(const std::basic_string<ValueType> &path);
+template<>
+std::string fs_to_utf8(const std::basic_string<char> &path)
+{
+    // Already UTF-8 natively, no conversion.
+    return path;
+}
+template<>
+std::string fs_to_utf8(const std::basic_string<wchar_t> &path)
+{
+    // Narrowing conversion required.
+    return nowide::narrow(path);
+}
 
 ///
 /// Object generator method for script_dir::iterator_range
@@ -75,13 +112,13 @@ make_iterator_range(Iterator iter1, Iterator iter2) {
 }
 
 
-script_dir::script_dir(const string &path)
+script_dir::script_dir(const std::string &path)
     // DRY, grrr
     : pimpl_(new impl(path))
 {}
-script_dir::script_dir(const string &path, const string &glob)
+script_dir::script_dir(const std::string &path, const std::string &file_extension)
     // DRY, grrr
-    : pimpl_(new impl(path, glob))
+    : pimpl_(new impl(path, file_extension))
 {}
 
 script_dir::~script_dir() = default;
@@ -89,15 +126,18 @@ script_dir::~script_dir() = default;
 
 void script_dir::impl::preload()
 {
+    namespace sys = boost::system;
+    namespace fs = boost::filesystem;
+    
     // Clear any existing cached version map.
     version_map_.clear();
     
-    fs::path root(path_);
+    fs::path root(utf8_to_fs<fs::path::value_type>(path_));
     if (!exists(root) || !is_directory(root))
     {
         // Path does not exist on disk.
         throw fs::filesystem_error("Script directory path does not exist", root,
-            errc::make_error_code(errc::no_such_file_or_directory));
+            sys::errc::make_error_code(sys::errc::no_such_file_or_directory));
     }
     
     // Examine directory contents.
@@ -126,15 +166,16 @@ void script_dir::impl::preload()
                     continue;
                 
                 // Only suitable file extensions.
-                auto sub_filename = sd_file.filename().native();
+                std::string sub_filename =
+                    fs_to_utf8(sd_file.filename().native());
                 if (!matches_extension(sub_filename, file_extension_))
                     continue;
                 
                 // Try to parse a version from this file, taking into account
                 // the name of its parent directory, which may contribute.
-                auto parent_dir = p.filename().native();
-                auto sub_ver = parse_filename(parent_dir, sub_filename);
-                auto sub_path = parent_dir + "/" + sub_filename;
+                std::string parent_dir = fs_to_utf8(p.filename().native());
+                semver sub_ver = parse_filename(parent_dir, sub_filename);
+                std::string sub_path = parent_dir + "/" + sub_filename;
                 if (version_map_.count(sub_ver)) {
                     throw script_dir_uniqueness_violation(
                         sub_ver, sub_path, version_map_[sub_ver]);
@@ -145,12 +186,12 @@ void script_dir::impl::preload()
         else if (is_file)
         {
             // Only suitable file extensions.
-            auto filename = p.filename().native();
+            std::string filename = fs_to_utf8(p.filename().native());
             if (!matches_extension(filename, file_extension_))
                 continue;
             
             // Try to parse a version from this file and add to the map.
-            auto ver = parse_filename(filename);
+            semver ver = parse_filename(filename);
             if (version_map_.count(ver)) {
                 throw script_dir_uniqueness_violation(
                     ver, filename, version_map_[ver]);
@@ -337,16 +378,23 @@ script_dir::range (const semver &from_version, const semver &to_version) const
 ///
 /// Find out if a filename matches a given extension.
 ///
-static bool matches_extension(const string &filename,
-                              const string &file_extension)
+static bool matches_extension(const std::string &filename,
+                              const std::string &file_extension)
 {
-    return filename_match(filename, "*" + file_extension);
+    if (filename.length() >= file_extension.length()) {
+        return (0 == filename.compare (
+            filename.length() - file_extension.length(),
+            file_extension.length(), file_extension));
+    } else {
+        return false;
+    }
 }
 
 ///
 /// Try to extract a semantic version by parsing a directory name and filename
 ///
-static semver parse_filename(const string &parent_dir_name, const string &filename)
+static semver parse_filename(const std::string &parent_dir_name,
+                             const std::string &filename)
 {
     // Several valid options:
     // 1. Dir is X.Y.Z, and filename is X.Y.Z+script.N_foo.sql
@@ -374,7 +422,7 @@ static semver parse_filename(const string &parent_dir_name, const string &filena
 ///
 /// Try to extract a semantic version by parsing a filename
 ///
-static semver parse_filename(const string &filename)
+static semver parse_filename(const std::string &filename)
 {
     // Several valid options:
     // 1. Filename is X.Y.Z+script.N_foo.sql
@@ -399,8 +447,8 @@ static semver parse_filename(const string &filename)
 /// dir/filename with path separator replaced by '+') to see if it's a valid
 /// semantic version for a script.
 ///
-static semver parse_semver_candidate(const string &candidate,
-                                     const string &path)
+static semver parse_semver_candidate(const std::string &candidate,
+                                     const std::string &path)
 {
     auto ver = semver::parse(candidate);
     auto &bm_ids = ver.bm_ids();
@@ -420,7 +468,6 @@ static semver parse_semver_candidate(const string &candidate,
     // Doesn't pass the tests.
     throw incomplete_filename(path);
 }
-
 
 } // dbmig namespace
 

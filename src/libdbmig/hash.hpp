@@ -20,8 +20,8 @@
 #define DBMIG_HASH_INCLUDED
 
 #include <string>
-#include <crypto++/sha.h>
-#include <crypto++/hex.h>
+#include <cryptopp/sha.h>
+#include <cryptopp/hex.h>
 
 namespace dbmig {
 

@@ -6,7 +6,7 @@ libdbmig_la_SOURCES = \
 	changelog_table.cpp changelog_table.hpp \
 	changelog.cpp \
 	script_action.cpp \
-	script_dir.cpp semver_compare.hpp filename_match.hpp \
+	script_dir.cpp semver_compare.hpp \
 	script_stream.cpp \
 	check.cpp \
 	migrate.cpp \
@@ -33,8 +33,9 @@ libdbmig_la_CPPFLAGS = \
 # Additional libraries.
 libdbmig_la_LIBADD = \
 	-lsoci_core \
-	-lcrypto++ \
+	-lcryptopp \
 	-lboost_system \
 	-lboost_filesystem \
-	-lboost_regex
+	-lboost_regex \
+	-lnowide
 
