@@ -21,14 +21,15 @@
 #include <algorithm>
 #include <numeric>
 #include <boost/filesystem.hpp>
-#include <fstream>
+#include <nowide/fstream.hpp>
 #include <stdexcept>
 
 #include "script_dir.hpp"
 #include "script_stream.hpp"
 #include "exception.hpp"
 
-using namespace std;
+using std::string;
+using nowide::ifstream;
 
 namespace dbmig {
 
@@ -219,7 +220,7 @@ repository::upgrade_script_at(const semver &ver) const
 }
 
 ///
-/// Convenience method obtain the SHA256 hash of a given script
+/// Convenience method to obtain the SHA256 hash of a given script
 ///
 std::string
 calculate_script_hash(const repository &repo,
@@ -229,24 +230,24 @@ calculate_script_hash(const repository &repo,
     switch (action) {
         case script_action::install:
         {
-            std::string path = repo.install_script_path() + "/" + script_path;
-            std::ifstream ifs{path};
-            return install_statements{ifs}.sha256_sum();
+            string path = repo.install_script_path() + "/" + script_path;
+            ifstream ifs{path};
+            return read_install_statements(ifs).sha256_sum();
         }
         case script_action::upgrade:
         {
-            std::string path = repo.upgrade_script_path() + "/" + script_path;
-            std::ifstream ifs{path};
-            return upgrade_statements{ifs}.sha256_sum();
+            string path = repo.upgrade_script_path() + "/" + script_path;
+            ifstream ifs{path};
+            return read_upgrade_statements(ifs).sha256_sum();
         }
         case script_action::rollback:
         {
-            std::string path = repo.upgrade_script_path() + "/" + script_path;
-            std::ifstream ifs{path};
-            return rollback_statements{ifs}.sha256_sum();
+            string path = repo.upgrade_script_path() + "/" + script_path;
+            ifstream ifs{path};
+            return read_rollback_statements(ifs).sha256_sum();
         }
     }
-    throw out_of_range{to_string(action)};
+    throw std::out_of_range{to_string(action)};
 }
 
 } // dbmig namespace

@@ -22,9 +22,11 @@
 #include <string>
 #include <istream>
 #include <vector>
-#include "script_action.hpp"
 #include "semantic_version.hpp"
 #include "script_dir.hpp"
+#include "hash.hpp"
+#include "getline.hpp"
+#include "statement_buffer.hpp"
 
 namespace dbmig
 {
@@ -34,18 +36,21 @@ namespace dbmig
     ///
     /// Class representing a range of lines from a script
     ///
-    template <script_action T>
     class script_statements
     {
-        // Pre-read all lines into a vector.  Not efficient, but works for now.
-        // TODO - consider making this lazy-load?
-        typedef std::vector<std::string> statements_list;
     public:
-        typedef statements_list::const_iterator iterator;
+        typedef std::vector<std::string> list_type;
+        typedef list_type::const_iterator iterator;
         
-        script_statements(std::istream &is);
-        
+        script_statements(const list_type &statements,
+                          const std::string sha256_sum) :
+            statements_(statements),
+            sha256_sum_(sha256_sum)
+        {}
+
+        /// Iterator pointing to the first statement
         iterator begin() { return statements_.cbegin(); }
+        /// Iterator pointing beyond the last statement
         iterator end()   { return statements_.cend();   }
         
         const std::string &sha256_sum() const
@@ -54,13 +59,135 @@ namespace dbmig
         }
         
     private:
-        statements_list statements_;
-        std::string sha256_sum_;
+        // Store all lines pre-read.  Not efficient for large files!
+        const list_type statements_;
+        const std::string sha256_sum_;
     };
     
-    typedef script_statements<script_action::install> install_statements;
-    typedef script_statements<script_action::upgrade> upgrade_statements;
-    typedef script_statements<script_action::rollback> rollback_statements;
+    // TODO - split the "read_X_statements" functions into a separate header!
+    
+    ///
+    /// Read statements from a stream in "install" mode
+    ///
+    template<typename InputStream>
+    script_statements read_install_statements(InputStream &is)
+    {
+        // Read all lines.
+        sha256_hash sum;
+        std::string line, line_ending;
+        script_statements::list_type statements;
+        auto stmt_buf = make_statement_buffer(std::back_inserter(statements));
+        
+        while (multiplatform_getline(is, line, line_ending))
+        {
+            stmt_buf.append(line + "\n"); // Ok to sanitise line endings
+        
+            // Add lines (and ending) to hash.
+            sum.update(line);
+            sum.update(line_ending);
+        }
+        
+        // Finalise anything left in the buffer.
+        stmt_buf.finalise();
+        
+        // Calculate digest.
+        sum.finalise();
+        // Encode to hex.
+        std::string sum_hex;
+        sum.hex_encode(sum_hex);
+        return script_statements{statements, sum_hex};
+    }
+
+    ///
+    /// Read statements from a stream in "upgrade" mode
+    ///
+    template<typename InputStream>
+    script_statements read_upgrade_statements(InputStream &is)
+    {
+        // Read all lines, up until we find the magic text.
+        sha256_hash sum;
+        std::string line, line_ending;
+        script_statements::list_type statements;
+        auto stmt_buf = make_statement_buffer(std::back_inserter(statements));
+        
+        // Record upgrade lines.
+        while (multiplatform_getline(is, line, line_ending))
+        {
+            // Add to hash.
+            sum.update(line);
+            sum.update(line_ending);
+            
+            if (line.find(script_partition_marker) != std::string::npos)
+                break;
+            
+            // Record the line.
+            stmt_buf.append(line + "\n");
+        }
+        // The remaining lines form part of the hash, but the statements there
+        // aren't parsed.
+        while (multiplatform_getline(is, line, line_ending))
+        {
+            // Add to hash.
+            sum.update(line);
+            sum.update(line_ending);
+        }
+        
+        stmt_buf.finalise();
+        
+        // Calculate digest.
+        sum.finalise();
+        // Encode to hex.
+        std::string sum_hex;
+        sum.hex_encode(sum_hex);
+        return script_statements{statements, sum_hex};
+    }
+
+    ///
+    /// Read statements from a stream in "rollback" mode
+    ///
+    /// Note that the hash that is built up in rollback mode is actually
+    /// the hash of the 'upgrade' portion of the script.  This is because when
+    /// rolling back, it is beneficial to check that what the current script to
+    /// be rolled back has not changed from when it was applied to the database,
+    /// and the hash of the upgrade part is the way to make that check.
+    ///
+    template<typename InputStream>
+    script_statements read_rollback_statements(InputStream &is)
+    {
+        // Read all lines, from the magic text until the end.
+        sha256_hash sum;
+        std::string line, line_ending;
+        script_statements::list_type statements;
+        auto stmt_buf = make_statement_buffer(std::back_inserter(statements));
+        
+        while (multiplatform_getline(is, line, line_ending))
+        {
+            // Add to hash.
+            sum.update(line);
+            sum.update(line_ending);
+                
+            if (line.find(script_partition_marker) != std::string::npos)
+                break;
+        }
+        while (multiplatform_getline(is, line, line_ending))
+        {
+            // Add to hash.
+            sum.update(line);
+            sum.update(line_ending);
+            
+            // Record the line.
+            stmt_buf.append(line + "\n");
+        }
+        
+        stmt_buf.finalise();
+        
+        // Calculate digest.
+        sum.finalise();
+        // Encode to hex.
+        std::string sum_hex;
+        sum.hex_encode(sum_hex);
+        return script_statements{statements, sum_hex};
+    }
 }
 
 #endif // DBMIG_SCRIPT_STREAM_INCLUDED

@@ -18,14 +18,16 @@
 
 #include "migrate.hpp"
 
-#include <fstream>
-#include <iostream>
+#include <nowide/fstream.hpp>
 #include <soci/soci.h>
 #include "script_stream.hpp"
 #include "script_action.hpp"
 #include "changelog_table.hpp"
 #include "time.hpp"
 #include "exception.hpp"
+
+using std::string;
+using nowide::ifstream;
 
 namespace dbmig {
 
@@ -37,11 +39,11 @@ namespace dbmig {
 /// take place within a single transaction.
 ///
 semver run_install_script(
-        const std::string &conn_str,
-        const std::string &changeset,
+        const string &conn_str,
+        const string &changeset,
         const semver &script_version,
-        const std::string &repo_install_path,
-        const std::string &script_path)
+        const string &repo_install_path,
+        const string &script_path)
 {
 //    auto start_time = time::now();
     soci::session s{conn_str};
@@ -49,8 +51,8 @@ semver run_install_script(
     soci::transaction txn{s};
     
     // Run the script.
-    std::ifstream ifs{repo_install_path + "/" + script_path};
-    install_statements statements{ifs};
+    ifstream ifs{repo_install_path + "/" + script_path};
+    auto statements = read_install_statements(ifs);
     for (auto statement : statements) {
         s << statement;
     }
@@ -78,11 +80,11 @@ semver run_install_script(
 /// take place within a single transaction.
 ///
 semver run_upgrade_script(
-        const std::string &conn_str,
-        const std::string &changeset,
+        const string &conn_str,
+        const string &changeset,
         const semver &script_version,
-        const std::string &repo_upgrade_path,
-        const std::string &script_path)
+        const string &repo_upgrade_path,
+        const string &script_path)
 {
 //    auto start_time = time::now();
     soci::session s{conn_str};
@@ -94,8 +96,8 @@ semver run_upgrade_script(
     auto existing_ver = cl.version();
     
     // Run the script.
-    std::ifstream ifs{repo_upgrade_path + "/" + script_path};
-    upgrade_statements statements{ifs};
+    ifstream ifs{repo_upgrade_path + "/" + script_path};
+    auto statements = read_upgrade_statements(ifs);
     for (auto statement : statements) {
         s << statement;
     }
@@ -117,12 +119,12 @@ semver run_upgrade_script(
 }
 
 static semver internal_run_rollback_script(
-        const std::string &conn_str,
-        const std::string &changeset,
+        const string &conn_str,
+        const string &changeset,
         const semver &rollback_to_version,
-        const std::string &repo_upgrade_path,
-        const std::string &script_path,
-        const std::string &alleged_sha256_sum)
+        const string &repo_upgrade_path,
+        const string &script_path,
+        const string &alleged_sha256_sum)
 {
 //    auto start_time = time::now();
     soci::session s{conn_str};
@@ -134,8 +136,8 @@ static semver internal_run_rollback_script(
     auto existing_ver = cl.version();
     
     // Read statements (and hash) from the file.
-    std::ifstream ifs{repo_upgrade_path + "/" + script_path};
-    rollback_statements statements{ifs};
+    ifstream ifs{repo_upgrade_path + "/" + script_path};
+    auto statements = read_rollback_statements(ifs);
     
     // Note: blank hash passed in means skip the checksum check.
     if (alleged_sha256_sum != "" &&
@@ -180,23 +182,23 @@ static semver internal_run_rollback_script(
 /// it was first run into a target database.
 ///
 semver run_rollback_script(
-        const std::string &conn_str,
-        const std::string &changeset,
+        const string &conn_str,
+        const string &changeset,
         const semver &rollback_to_version,
-        const std::string &repo_upgrade_path,
-        const std::string &script_path)
+        const string &repo_upgrade_path,
+        const string &script_path)
 {
     return internal_run_rollback_script(conn_str, changeset,
                                         rollback_to_version, repo_upgrade_path,
                                         script_path, "");
 }
 semver run_rollback_script(
-        const std::string &conn_str,
-        const std::string &changeset,
+        const string &conn_str,
+        const string &changeset,
         const semver &rollback_to_version,
-        const std::string &repo_upgrade_path,
-        const std::string &script_path,
-        const std::string &alleged_sha256_sum)
+        const string &repo_upgrade_path,
+        const string &script_path,
+        const string &alleged_sha256_sum)
 {
     return internal_run_rollback_script(conn_str, changeset,
                                         rollback_to_version, repo_upgrade_path,

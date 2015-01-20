@@ -7,12 +7,13 @@ libdbmig_la_SOURCES = \
 	changelog.cpp \
 	script_action.cpp \
 	script_dir.cpp semver_compare.hpp \
-	script_stream.cpp \
 	check.cpp \
 	migrate.cpp \
 	repository.cpp \
 	time.cpp time.hpp \
-	hash.hpp
+	hash.hpp \
+	getline.hpp \
+	statement_buffer.hpp
 include_HEADERS = \
 	semantic_version.hpp \
 	exception.hpp \

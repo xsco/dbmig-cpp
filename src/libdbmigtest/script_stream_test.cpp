@@ -21,21 +21,22 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE script_stream_test
 #include <boost/test/unit_test.hpp>
-#include <fstream>
+#include <nowide/fstream.hpp>
 #include "pair_special.hpp"
 
 
 using namespace dbmig;
+using nowide::ifstream;
 
 
 BOOST_AUTO_TEST_CASE (repo4_install_nonempty)
 {
     // Get ifstream on an example script path.
     auto path = "data/repo4/install/2.44.2/2.44.2+script.0057_install.sql";
-    std::ifstream ifs{path};
+    ifstream ifs{path};
 
     // Check lines
-    auto statements = install_statements(ifs);
+    auto statements = read_install_statements(ifs);
     auto b = statements.begin();
     auto e = statements.end();
     BOOST_CHECK_EQUAL(*b++, "SELECT 'foo'");
@@ -55,10 +56,10 @@ BOOST_AUTO_TEST_CASE (repo4_upgrade_nonempty)
 {
     // Get ifstream on the script path.
     auto path = "data/repo4/upgrade/2.44.3/0001_foo.sql";
-    std::ifstream ifs{path};
+    ifstream ifs{path};
     
     // Check lines
-    auto statements = upgrade_statements(ifs);
+    auto statements = read_upgrade_statements(ifs);
     auto b = statements.begin();
     auto e = statements.end();
     BOOST_CHECK_EQUAL(*b++, "SELECT 'foo'");
@@ -78,10 +79,10 @@ BOOST_AUTO_TEST_CASE (repo4_upgrade_empty)
 {
     // Get ifstream on the script path.
     auto path = "data/repo4/upgrade/2.44.3/0002_bar.sql";
-    std::ifstream ifs{path};
+    ifstream ifs{path};
     
     // Check lines
-    auto statements = upgrade_statements(ifs);
+    auto statements = read_upgrade_statements(ifs);
     auto b = statements.begin();
     auto e = statements.end();
     BOOST_CHECK(b == e);
@@ -98,10 +99,10 @@ BOOST_AUTO_TEST_CASE (repo4_rollback_nonempty)
 {
     // Get ifstream on the script path.
     auto path = "data/repo4/upgrade/2.44.3/0001_foo.sql";
-    std::ifstream ifs{path};
+    ifstream ifs{path};
     
     // Check lines
-    auto statements = rollback_statements(ifs);
+    auto statements = read_rollback_statements(ifs);
     auto b = statements.begin();
     auto e = statements.end();
     BOOST_CHECK_EQUAL(*b++, "SELECT 'baz'");
@@ -121,10 +122,10 @@ BOOST_AUTO_TEST_CASE (repo4_rollback_empty)
 {
     // Get ifstream on the script path.
     auto path = "data/repo4/upgrade/2.44.3/0002_bar.sql";
-    std::ifstream ifs{path};
+    ifstream ifs{path};
     
     // Check lines
-    auto statements = rollback_statements(ifs);
+    auto statements = read_rollback_statements(ifs);
     auto b = statements.begin();
     auto e = statements.end();
     BOOST_CHECK(b == e);
