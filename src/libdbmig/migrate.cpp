@@ -51,7 +51,8 @@ semver run_install_script(
     soci::transaction txn{s};
     
     // Run the script.
-    ifstream ifs{repo_install_path + "/" + script_path};
+    string full_path = repo_install_path + "/" + script_path;
+    ifstream ifs{full_path.c_str()};
     auto statements = read_install_statements(ifs);
     for (auto statement : statements) {
         s << statement;
@@ -96,7 +97,8 @@ semver run_upgrade_script(
     auto existing_ver = cl.version();
     
     // Run the script.
-    ifstream ifs{repo_upgrade_path + "/" + script_path};
+    string full_path = repo_upgrade_path + "/" + script_path;
+    ifstream ifs{full_path.c_str()};
     auto statements = read_upgrade_statements(ifs);
     for (auto statement : statements) {
         s << statement;
@@ -136,7 +138,8 @@ static semver internal_run_rollback_script(
     auto existing_ver = cl.version();
     
     // Read statements (and hash) from the file.
-    ifstream ifs{repo_upgrade_path + "/" + script_path};
+    string full_path = repo_upgrade_path + "/" + script_path;
+    ifstream ifs{full_path.c_str()};
     auto statements = read_rollback_statements(ifs);
     
     // Note: blank hash passed in means skip the checksum check.

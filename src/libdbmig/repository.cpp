@@ -231,19 +231,19 @@ calculate_script_hash(const repository &repo,
         case script_action::install:
         {
             string path = repo.install_script_path() + "/" + script_path;
-            ifstream ifs{path};
+            ifstream ifs{path.c_str()};
             return read_install_statements(ifs).sha256_sum();
         }
         case script_action::upgrade:
         {
             string path = repo.upgrade_script_path() + "/" + script_path;
-            ifstream ifs{path};
+            ifstream ifs{path.c_str()};
             return read_upgrade_statements(ifs).sha256_sum();
         }
         case script_action::rollback:
         {
             string path = repo.upgrade_script_path() + "/" + script_path;
-            ifstream ifs{path};
+            ifstream ifs{path.c_str()};
             return read_rollback_statements(ifs).sha256_sum();
         }
     }
