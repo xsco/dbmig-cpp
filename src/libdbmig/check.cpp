@@ -18,7 +18,6 @@
 
 #include "check.hpp"
 
-#include <iostream>
 #include "changelog.hpp"
 #include "repository.hpp"
 #include "script_stream.hpp"
@@ -110,18 +109,10 @@ perform_check(
         scripts.push_back({script_action::upgrade, us.first, us.second});
     }
     
-#if 0
-    // FIXME temp
-    for (auto &i : cl_entries)
-        std::cout << "CL: " << i.to_version << std::endl;
-    for (auto &i : scripts)
-        std::cout << "RP: " << i.version << std::endl;
-#endif
-    
     check_report report;
     
     // The changelog events and repository scripts are in ascending order of
-    // version already.  Apply a the diff algorithm.
+    // version already.  Apply the diff algorithm.
     changelog_entry_script_info_cmp cmp;
     changelog_entry_script_info_eq  eq;
     diff(

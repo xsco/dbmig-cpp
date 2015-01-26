@@ -16,11 +16,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <iostream>
+#include <nowide/iostream.hpp>
 #include <string>
 #include <changelog.hpp>
 
-using namespace std;
+using nowide::cout;
+using std::endl;
 
 ///
 /// Show the currently-installed version of a given database

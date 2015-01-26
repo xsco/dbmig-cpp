@@ -18,16 +18,19 @@
 #include <config.h>
 
 #include <boost/program_options.hpp>
-#include <iostream>
+#include <nowide/iostream.hpp>
 
 #include "services.hpp"
 #include "console_util.hpp"
 
 
-using namespace std;
 namespace po = boost::program_options;
+using std::string;
+using nowide::cout;
+using nowide::cerr;
+using std::endl;
 
-static void print_usage(ostream &os, const po::options_description &od)
+static void print_usage(std::ostream &os, const po::options_description &od)
 {
     os << "Usage:" << endl;
     os << PACKAGE " command [-t database] [options]" << endl << endl;
@@ -54,7 +57,7 @@ static void print_usage(ostream &os, const po::options_description &od)
 static void check_target(const po::variables_map &vm)
 {
     if (!vm.count("target"))
-        throw domain_error(
+        throw std::domain_error(
             "a target database connection string must be provided ("
             "see the --target option)");
 }
@@ -137,7 +140,7 @@ int main(int argc, char *argv[])
         
             // Any unrecognised options from the first pass are assumed to
             // belong to this sub-command.
-            std::vector<std::string> opts = po::collect_unrecognized(
+            std::vector<string> opts = po::collect_unrecognized(
                 parsed.options, po::include_positional);
             opts.erase(opts.begin()); // Remove the command itself.
 
@@ -161,7 +164,7 @@ int main(int argc, char *argv[])
         
             // Any unrecognised options from the first pass are assumed to
             // belong to this sub-command.
-            std::vector<std::string> opts = po::collect_unrecognized(
+            std::vector<string> opts = po::collect_unrecognized(
                 parsed.options, po::include_positional);
             opts.erase(opts.begin()); // Remove the command itself.
 
@@ -170,7 +173,7 @@ int main(int argc, char *argv[])
             
             // TODO - print help pages for sub-commands
             if (!vm.count("version")) {
-                throw domain_error(
+                throw std::domain_error(
                     "a target version must be provided for override-version "
                     "(see the --version option)");
             }
@@ -194,7 +197,7 @@ int main(int argc, char *argv[])
         
             // Any unrecognised options from the first pass are assumed to
             // belong to this sub-command.
-            std::vector<std::string> opts = po::collect_unrecognized(
+            std::vector<string> opts = po::collect_unrecognized(
                 parsed.options, po::include_positional);
             opts.erase(opts.begin()); // Remove the command itself.
 

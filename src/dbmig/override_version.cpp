@@ -16,12 +16,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <iostream>
+#include <nowide/iostream.hpp>
 #include <sstream>
 #include <string>
 #include <changelog.hpp>
 
 #include "console_util.hpp"
+
+using std::string;
+using nowide::cout;
+using nowide::cerr;
+using std::endl;
 
 ///
 /// Forcibly override the version in a given database
@@ -42,27 +47,29 @@ void override_version(
     const bool force,
     const std::string &version_str)
 {
+    using std::stringstream;
+
     // Parse the version string to a real version.
     auto version = dbmig::semver::parse(version_str);
     
     dbmig::changelog cl{conn_str, changeset};
     if (verbose && !cl.installed()) {
-        std::cout << "No changelog table currently exists - it will be created"
-            << std::endl;
+        cout << "No changelog table currently exists - it will be created"
+             << endl;
     }
     
     // Get the existing version.
     auto existing_version = cl.version();
     if (verbose) {
         if (existing_version.is_zero())
-            std::cout << "No existing version installed" << std::endl;
+            cout << "No existing version installed" << endl;
         else
-            std::cout << "Existing version is " << existing_version << std::endl;
+            cout << "Existing version is " << existing_version << endl;
     }
     
     if (!force) {
         // Prompt for confirmation
-        std::stringstream ss;
+        stringstream ss;
         if (existing_version.is_zero())
             ss << "Forcibly override to " << version << "?";
         else
@@ -77,10 +84,10 @@ void override_version(
     
     if (verbose) {
         if (existing_version.is_zero())
-            std::cout << "Version overridden to " << version << std::endl;
+            cout << "Version overridden to " << version << endl;
         else
-            std::cout << "Version overridden from " << existing_version
-                      << " to " << version << std::endl;
+            cout << "Version overridden from " << existing_version
+                 << " to " << version << endl;
     }
 }
 

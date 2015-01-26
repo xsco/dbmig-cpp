@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <iostream>
+#include <nowide/iostream.hpp>
 #include <string>
 #include <stdexcept>
 #include <repository.hpp>
@@ -26,7 +26,10 @@
 #include "console_util.hpp"
 
 
-using namespace std;
+using std::string;
+using nowide::cout;
+using nowide::cerr;
+using std::endl;
 
 ///
 /// Install a baseline version into the target environment
@@ -39,12 +42,14 @@ static dbmig::semver install_baseline(
     dbmig::repository &repo,
     const dbmig::semver &target_version)
 {
+    using std::range_error;
+
     // There is no version of anything currently installed in the database.
     // Look through the repository for the nearest install script to our
     // desired target version.
     if (verbose) {
-        std::cout << "No version installed; looking for install scripts"
-                  << std::endl;
+        cout << "No version installed; looking for install scripts"
+             << endl;
     }
     
     auto install_scripts = repo.nearest_install_script(target_version);
@@ -58,13 +63,13 @@ static dbmig::semver install_baseline(
     
     auto &install_script = install_scripts.first;
     if (verbose) {
-        std::cout << "INSTALL to " << install_script->first
-                  << ", script " << install_script->second
-                  << std::endl;
+        cout << "INSTALL to " << install_script->first
+             << ", script " << install_script->second
+             << endl;
     }
 
     if (!force) {
-        std::string msg = "Run install script " + install_script->second + "?";
+        string msg = "Run install script " + install_script->second + "?";
         if (!console_confirmation(msg.c_str()))
             throw user_driven_cancel{};
     }
@@ -87,8 +92,8 @@ static dbmig::semver upgrade(
     const dbmig::semver &target_version)
 {
     if (verbose) {
-        std::cout << "Finding upgrade scripts to go from "
-            << from_version << " to " << target_version << std::endl;
+        cout << "Finding upgrade scripts to go from "
+             << from_version << " to " << target_version << endl;
     }
     
     auto uscripts = repo.upgrade_scripts(from_version, target_version);
@@ -98,12 +103,12 @@ static dbmig::semver upgrade(
         auto path = s->second;
 
         if (verbose) {
-            std::cout << "UPGRADE from " << current_version << " to "
-                << ver << ", script " << path << std::endl;
+            cout << "UPGRADE from " << current_version << " to "
+                 << ver << ", script " << path << endl;
         }
         
         if (!force) {
-            std::string msg = "Run upgrade script " + path + "?";
+            string msg = "Run upgrade script " + path + "?";
             if (!console_confirmation(msg.c_str()))
                 throw user_driven_cancel{};
         }
@@ -128,9 +133,11 @@ static dbmig::semver rollback(
     const dbmig::semver &start_from_version,
     const dbmig::semver &target_version)
 {
+    using std::out_of_range;
+
     if (verbose) {
-        std::cout << "Searching changelog history for path from "
-            << start_from_version << " to " << target_version << std::endl;
+        cout << "Searching changelog history for path from "
+             << start_from_version << " to " << target_version << endl;
     }
 
     // Try to obtain rollback steps to our desired target version.
@@ -139,9 +146,9 @@ static dbmig::semver rollback(
     if (verbose) {
         int n = rollback_steps.size();
         if (n == 1)
-            std::cout << "Determined 1 rollback step" << std::endl;
+            cout << "Determined 1 rollback step" << endl;
         else if (n > 0)
-            std::cout << "Determined " << n << " rollback steps" << std::endl;
+            cout << "Determined " << n << " rollback steps" << endl;
     }
     
     // Find out if the target version is in the changelog history.
@@ -169,8 +176,8 @@ static dbmig::semver rollback(
         auto &cl_hash  = step.sha256_hash;
         
         if (verbose) {
-            std::cout << "Looking for script to rollback from " << from_ver
-                      << " to " << to_ver << "..." << std::endl;
+            cout << "Looking for script to rollback from " << from_ver
+                 << " to " << to_ver << "..." << endl;
         }
         
         // Find the relevant script.
@@ -184,12 +191,12 @@ static dbmig::semver rollback(
         // Roll back the script.
         auto &script_path = range.first->second;
         if (verbose) {
-            std::cout << "ROLLBACK from " << from_ver << " to "
-                << to_ver << ", script " << script_path << std::endl;
+            cout << "ROLLBACK from " << from_ver << " to "
+                 << to_ver << ", script " << script_path << endl;
         }
         
         if (!force) {
-            std::string msg = "Run rollback script " + script_path + "?";
+            string msg = "Run rollback script " + script_path + "?";
             if (!console_confirmation(msg.c_str()))
                 throw user_driven_cancel{};
         }
@@ -217,8 +224,7 @@ static void migrate(
                                            repo, target_version);
     }
     else {
-        std::cout << "Currently-installed version is " << current_version
-            << std::endl;
+        cout << "Currently-installed version is " << current_version << endl;
     }
     
     // Are we going forward or backwards?
@@ -228,7 +234,7 @@ static void migrate(
                                   current_version, target_version);
 
         if (verbose) {
-            std::cout << "Upgraded to version " << current_version << std::endl;
+            cout << "Upgraded to version " << current_version << endl;
         }
     }
     else if (target_version < current_version) {
@@ -237,23 +243,22 @@ static void migrate(
                                    current_version, target_version);
         
         if (verbose) {
-            std::cout << "Rolled back to version " << current_version
-                      << std::endl;
+            cout << "Rolled back to version " << current_version << endl;
         }
     }
     else {
         // No further work needed, as we're already at the target version
         if (verbose) {
-            std::cout << "Already at target version.  No further upgrade "
-                         "scripts need to be run" << std::endl;
+            cout << "Already at target version.  No further upgrade "
+                    "scripts need to be run" << endl;
         }
     }
     
     // Check we reached the version.
     if (current_version != target_version) {
-        std::cerr << "Warning: migrated to version " << current_version
-                  << ", rather than requested version " << target_version
-                  << std::endl;
+        cerr << "Warning: migrated to version " << current_version
+             << ", rather than requested version " << target_version
+             << endl;
     }
 }
 
@@ -272,8 +277,8 @@ void migrate(
     // Find the latest version in the repository.
     auto target_version = repo.latest_version();
     if (verbose) {
-        std::cout << "Will attempt to migrate to version " << target_version
-            << std::endl;
+        cout << "Will attempt to migrate to version " << target_version
+             << endl;
     }
     
     migrate(conn_str, changeset, verbose, force, repo, target_version);
@@ -295,8 +300,8 @@ void migrate(
     // Parse the version.
     auto target_version = dbmig::semver::parse(version_str);
     if (verbose) {
-        std::cout << "Will attempt to migrate to latest version "
-            << target_version << std::endl;
+        cout << "Will attempt to migrate to latest version "
+             << target_version << endl;
     }
     
     migrate(conn_str, changeset, verbose, force, repo, target_version);

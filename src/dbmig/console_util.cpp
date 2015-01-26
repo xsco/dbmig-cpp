@@ -18,7 +18,7 @@
 
 #include <console_util.hpp>
 #include <stdexcept>
-#include <iostream>
+#include <nowide/iostream.hpp>
 
 using namespace std;
 
@@ -27,7 +27,10 @@ using namespace std;
 ///
 bool console_confirmation(const char *prompt)
 {
-    using namespace std;
+    using std::string;
+    using nowide::cout;
+    using std::endl;
+    
     while (true)
     {
         cout << prompt << " [yn] ";

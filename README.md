@@ -27,6 +27,7 @@ Dependencies
 dbmig requires suitable versions of the following libraries:
 
 * [Boost](http://www.boost.org)
+* [Boost.Nowide](http://cppcms.com/files/nowide/html)
 * [SOCI](http://soci.sourceforge.net)
 * [Crypto++](http://www.cryptopp.com)
 

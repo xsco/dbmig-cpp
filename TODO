@@ -8,6 +8,9 @@ TODO List:
   - ./configure --host=x86_64-w64-mingw32
 * Add tests for when upgrade/rollback scripts don't have the magic separator.
 * Fill in timing information when running scripts.
+* Add tests for scripts in non-UTF-8 encoding.
+* Add support for test DB connections in configure step, and use these in
+  integration tests.
 * Add DocBook sources and integrate with autotools.
 * Expand the check command to work with situations where a repository has had
   old upgrade scripts compressed into a single install script.
