@@ -17,11 +17,7 @@ AM_CPPFLAGS = \
 	-Werror -Wall
 
 # Linker flags.
-#LDADD = ../libdbmig/libdbmig.la \
-#	-lboost_system \
-#	-lboost_unit_test_framework
-
 LDADD = ../libdbmig/libdbmig.la \
-	-lboost_system-mt \
-	-lboost_unit_test_framework-mt
+	-l$(LIB_BOOST_SYSTEM) \
+	-l$(LIB_BOOST_UNIT_TEST_FRAMEWORK)
 

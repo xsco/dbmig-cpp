@@ -11,17 +11,11 @@ dbmig_CPPFLAGS = \
 	-Werror -Wall
 
 # Linker flags.
-dbmig_LDFLAGS = -s
-dbmig_LDFLAGS += -static-libgcc -static-libstdc++
+dbmig_LDFLAGS = -s $(LDFLAG_STATIC_LIBGCC) $(LDFLAG_STATIC_LIBSTDCPP)
 
 # Additional libraries for the linker.
-#dbmig_LDADD = ../libdbmig/libdbmig.la \
-#	-lboost_system \
-#	-lboost_program_options \
-#	-lnowide
-
 dbmig_LDADD = ../libdbmig/libdbmig.la \
-	-lboost_system-mt \
-	-lboost_program_options-mt \
-	-lnowide
+	-l$(LIB_NOWIDE) \
+	-l$(LIB_BOOST_SYSTEM) \
+	-l$(LIB_BOOST_PROGRAM_OPTIONS)
 

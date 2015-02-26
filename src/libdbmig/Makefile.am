@@ -32,19 +32,11 @@ libdbmig_la_CPPFLAGS = \
 	-Werror -Wall
 
 # Additional libraries.
-#libdbmig_la_LIBADD = \
-#	-lsoci_core \
-#	-lcryptopp \
-#	-lboost_system \
-#	-lboost_filesystem \
-#	-lboost_regex \
-#	-lnowide
-
 libdbmig_la_LIBADD = \
-	-lsoci_core_3_2 \
-	-lcryptopp \
-	-lboost_system-mt \
-	-lboost_filesystem-mt \
-	-lboost_regex-mt \
-	-lnowide
+	-l$(LIB_SOCI_CORE) \
+	-l$(LIB_CRYPTOPP) \
+	-l$(LIB_NOWIDE) \
+	-l$(LIB_BOOST_SYSTEM) \
+	-l$(LIB_BOOST_FILESYSTEM) \
+	-l$(LIB_BOOST_REGEX)
 

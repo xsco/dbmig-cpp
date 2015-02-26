@@ -1,8 +1,11 @@
 TODO List:
 
-* Find out suitable Automake conventions for cross-compilation.
-  - Add conditionals in Automake based on target (host or target var?) system.
-  - How to neatly cater for libraries being named differently on Windows?
+* Test connectivity with ODBC driver (using psqlodbc for now).
+  - Connection string: "odbc://DSN=dbmig_ex1;foo=bar;baz=quux"
+* Change db_specific.cpp/hpp to be keyed on SQL dialect rather than DB type.
+  - This is because something like generic like "ODBC" type might involve
+    possibly-different dialects underneath.
+  - Or maybe move as much as possible to "standard" SQL?
 * Add tests for when upgrade/rollback scripts don't have the magic separator.
 * Fill in timing information when running scripts.
 * Add tests for scripts in non-UTF-8 encoding.
@@ -12,13 +15,13 @@ TODO List:
 * Expand the check command to work with situations where a repository has had
   old upgrade scripts compressed into a single install script.
 * Add libdbmigtest/data/ to Makefiles so that it is included in "make dist".
+* Implement create-unversioned command using DFS search on filesystem.
+* Implement purge command.
 * Add a -s/--simulate switch to print what *would* happen.
 * Add integration tests that will use a real database environment to run tests.
   - Should there be a test/ sub-dir in libdbmig for genuine unit tests of the
     internal classes, and use libdbmigtest only for integration tests on the
     public API?
-* Implement create-unversioned command using DFS search on filesystem.
-* Implement purge command.
 * Write unit tests that cover globbing functionality in script_dir.
 * Clean up repeated option-parsing code in dbmig.cpp.
 * Move libdbmig includes to a dbmig/ subdir, e.g. #include <dbmig/migrate.hpp>
@@ -26,12 +29,14 @@ TODO List:
 * Think about approach to Java / .NET bindings.
 
 Completed:
+* Neatly cater for libraries being named differently on Windows.
+  - Use conditional in configure.ac based on $host (feels a bit hackish).
 * Ensure cross-compiling for win32 works
   - Need to either link EVERYTHING statically against libgcc and libstdc++ or
     provide libgcc_s_sjlj-1.dll and libstdc++-6.dll in $(prefix)/bin.
     Can use the -static-libgcc -static-libstdc++ LDFLAGS options.
   - What about libwinpthread-1.dll?  Why is this required?
-  - ./configure --host=i686-w64-mingw32
+  - ./configure --host=i686-w64-mingw32 --prefix=/usr/i686-w64-mingw32
 * Change all console logging in dbmig to be Unicode-aware.
   - Accept Unicode strings in UTF-8 format: http://www.utf8everywhere.org
 * Make libdbmig fully Unicode-aware (even on Windows):
